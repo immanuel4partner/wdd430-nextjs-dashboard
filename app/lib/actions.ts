@@ -143,13 +143,22 @@ export async function deleteInvoice(id: string) {
   revalidatePath('/dashboard/invoices');
 }
 
-// AUTHENTICATE USER
+// AUTHENTICATE USER - FIXED FOR PRODUCTION
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
   try {
-    await signIn('credentials', formData);
+    // ✅ Extract values from FormData (fixes Vercel deployment issue)
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    
+    // ✅ Pass as plain object instead of FormData
+    await signIn('credentials', {
+      email: email,
+      password: password,
+      redirectTo: '/dashboard',
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
